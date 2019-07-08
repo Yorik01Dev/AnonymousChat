@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sigh up</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://getbootstrap.com/docs/4.3/examples/checkout/form-validation.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#subm').click(function (e) {
+                e.preventDefault();
+                let regData = {
+                    name: $("#firstName").val(),
+                    lastName: $("#lastName").val(),
+                    username: $("#username").val(),
+                    email: $("#email").val(),
+                    password: $("#password").val()
+            };console.log(regData);
+
+                $.ajax({
+                    url: '/regUser',
+                    data: JSON.stringify(regData),
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    processData: false,
+                    success: function (data){
+                    console.log(data)
+                        alert('You have been registered successfully!');
+                        document.location.href = '/login';
+                    },
+                    error: function (err) {
+                        console.log(err);
+                    }
+                });
+            });
+        });
+    </script>
+    <link href="https://getbootstrap.com/docs/4.3/examples/checkout/form-validation.css" rel="stylesheet">
+</head>
+<body>
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+    <h5 class="my-0 mr-md-auto font-weight-normal">@AnonChat</h5>
+    <nav class="my-2 my-md-0 mr-md-3">
+        <a class="p-2 text-dark" href="#">Features</a>
+        <a class="p-2 text-dark" href="#">Support</a>
+        <a class="p-2 text-dark" href="#">About</a>
+    </nav>
+    <a class="btn btn-outline-primary" href="/login">Sign in</a>
+</div>
+<div class="py-5 text-center">
+    <img class="d-block mx-auto mb-4" src="/docs/4.3/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">
+    <h2>Registration form</h2>
+    <p class="lead">Firstly you have to complete the registration procedure</p>
+</div>
+<div class="col-md-8 order-md-1">
+    <h4 class="mb-3"></h4>
+    <form class="needs-validation">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="firstName">First name</label>
+                <input type="text" class="form-control" id="firstName" placeholder="" value="" required>
+                <div class="invalid-feedback">
+                    Valid first name is required.
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="lastName">Last name</label>
+                <input type="text" class="form-control" id="lastName" placeholder="" value="" required>
+                <div class="invalid-feedback">
+                    Valid last name is required.
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="username">Username</label>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">@</span>
+                </div>
+                <input type="text" class="form-control" id="username" placeholder="Username" required>
+                <div class="invalid-feedback" style="width: 100%;">
+                    Your username is required.
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="email">Email <span class="text-muted">(Optional)</span></label>
+            <input type="email" class="form-control" id="email" placeholder="you@example.com">
+            <div class="invalid-feedback">
+                Please enter a valid email address for shipping updates.
+            </div>
+        </div>
+
+        <div class="mb-3">
+                <label for="email">Password <span class="text-muted"></span></label>
+            <input type="password" class="form-control" id="password" placeholder="password...">
+            <div class="invalid-feedback">
+                Please enter a valid email address for shipping updates.
+            </div>
+        </div>
+
+        <hr class="mb-4">
+        <button class="btn btn-primary btn-lg btn-block" type="submit" id="subm">Continue to checkout</button>
+    </form>
+</div>
+
+<footer class="my-5 pt-5 text-muted text-center text-small">
+    <p class="mb-1">&copy; 2017-2019 MyCompany</p>
+    <ul class="list-inline">
+        <li class="list-inline-item"><a href="#">Privacy</a></li>
+        <li class="list-inline-item"><a href="#">Terms</a></li>
+        <li class="list-inline-item"><a href="#">Support</a></li>
+    </ul>
+</footer>
+</body>
+</html>

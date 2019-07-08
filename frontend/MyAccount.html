@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="http://localhost:80/socket.io/socket.io.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="custom.css">
+    <title>MyAccount</title>
+    <style>
+        body{
+            font-family: 'Raleway', sans-serif;
+            background: #E9ECE9;
+        }
+        .comments-main{
+            background: #FFF;
+        }
+        .comment time, .comment:hover time,.icon-rocknroll, .like-count {
+            -webkit-transition: .25s opacity linear;
+            transition: .25s opacity linear;
+        }
+        .comments-main ul li{
+            list-style: none;
+        }
+        .comments .comment {
+            padding: 5px 10px;
+            background: #00AF90;
+        }
+        .comments .comment:hover time{
+            opacity: 1;
+        }
+        .comments .user-img img {
+            width: 50px;
+            height: 50px;
+        }
+        .comments .comment h4 {
+            display: inline-block;
+            font-size: 16px;
+        }
+        .comments .comment h4 a {
+            color: #404040;
+            text-decoration: none;
+        }
+        .comments .comment .icon-rocknroll {
+            color: #545454;
+            font-size: .85rem;
+        }
+        .comments .comment .icon-rocknroll:hover {
+            opacity: .5;
+        }
+        .comments .comment time,.comments .comment .like-count,.comments .comment .icon-rocknroll {
+            font-size: .75rem;
+            opacity: 0;
+        }
+        .comments .comment time, .comments .comment .like-count {
+            font-weight: 300;
+        }
+        .comments .comment p {
+            font-size: 13px;
+        }
+        .comments .comment p .reply {
+            color: #BFBFA8;
+            cursor: pointer;
+        }
+        .comments .comment .active {
+            opacity: 1;
+        }
+        .icon-rocknroll {
+            background: none;
+            outline: none;
+            cursor: pointer;
+            margin: 0 .125rem 0 0;
+        }
+        .comments .comment:hover .icon-rocknroll,.comments .comment:hover .like-count {
+            opacity: 1;
+        }
+        .comment-box-main{
+            background: #CCCCCC;
+        }
+        @media (min-width: 320px) and (max-width: 480px){
+            .comments .comment h4 {
+                font-size: 12px;
+            }
+            .comments .comment p{
+                font-size: 11px;
+            }
+            .comment-box-main .send-btn button{
+                margin-left: 5px;
+            }
+        }
+
+        .countdown{
+            position: absolute;
+            left: 5%;
+            font-family: sans-serif;
+            color: #fff;
+            display: inline-block;
+            font-weight: 100;
+            text-align: center;
+            font-size: 30px;
+        }
+
+        .countdown-number {
+            padding: 10px;
+            border-radius: 3px;
+            background: #00bf96;
+            display: inline-block;
+        }
+
+        .countdown-time {
+            padding: 15px;
+            border-radius: 3px;
+            background: #00816a;
+            display: inline-block;
+        }
+
+        .countdown-text {
+            display: block;
+            padding-top: 5px;
+            font-size: 16px;
+        }
+
+        .btn-danger{
+            position: absolute;
+            left: 43%;
+            top: 40%;
+            width: 200px;
+            height: 50px;
+        }
+
+        .line {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 15px;
+            background-color: #4b9cdb;
+        }
+        .load-wrapp {
+             position: relative;
+             float: left;
+             width: 100px;
+             height: 100px;
+             margin: 0 10px 10px 0;
+             padding: 20px 20px 20px;
+             left: 47%;
+             top: 100px;
+         }
+
+        #msg_container{
+            height: 300px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .load-1 .line:nth-last-child(1) {animation: loadingA 1.5s 1s infinite;}
+        .load-1 .line:nth-last-child(2) {animation: loadingA 1.5s .5s infinite;}
+        .load-1 .line:nth-last-child(3) {animation: loadingA 1.5s 0s infinite;}
+
+        @keyframes loadingA {
+        0 {height: 15px;}
+        50% {height: 35px;}
+        100% {height: 15px;}
+        }
+
+    </style>
+    <script>
+        function getTimeRemaining(endtime) {
+            let t = Date.parse(endtime) - Date.parse(new Date());
+            let seconds = Math.floor((t / 1000) % 60);
+            let minutes = Math.floor((t / 1000 / 60) % 60);
+            let hours = Math.floor((t / (1000 * 60 * 60)) % 24);
+            let days = Math.floor(t / (1000 * 60 * 60 * 24));
+            return {
+                'total': t,
+                'days': days,
+                'hours': hours,
+                'minutes': minutes,
+                'seconds': seconds
+            };
+        }
+
+        function initializeClock(id, endtime, call) {
+
+            function updateClock() {
+                let t = getTimeRemaining(endtime);
+
+                $('.minutes').text(('0' + t.minutes).slice(-2));
+                $('.seconds').text(('0' + t.seconds).slice(-2));
+
+                if (t.total <= 0) {
+                    clearInterval(timeinterval);
+                    call();
+                }
+            }
+
+            updateClock();
+            let timeinterval = setInterval(updateClock, 1000);
+        }
+
+        let socket = io().connect('http://localhost:80');
+
+        let UserData_ = '';
+        let userObj;
+        let chatInfo;
+        let isLoading = false;
+
+        function closeChat(info){
+            chatInfo = null;
+            isLoading = false;
+
+            $('.btn-danger').text('Start random chat');
+            $('.container').remove();
+            $('#countdown').remove()
+            $('body').append('<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center" id="main_menu">\n' +
+                '    <h1 class="display-4" id="menu_title">Start chatting</h1>\n' +
+                '    <p class="lead" id="sub_title">Click the button to start the searching of a random person</p>\n' +
+                '</div>');
+        }
+
+        function closeSearch(){
+            chatInfo = null;
+            isLoading = false;
+
+            $('.btn-danger').text('Start random chat');
+            $('#menu_title').text('Start chatting');
+            $('#sub_title').text('Click the button to start the searching of a random person');
+        }
+
+        $(document).ready(function () {
+            if(UserData_ !== ''){
+                userObj = JSON.parse(UserData_);
+                $('#username').text('Hi, ' + userObj.username);
+            }
+            else
+                document.location.href = './login';
+
+            $('.btn-danger').click(function () {
+                if(!isLoading) {
+                    socket.emit('newUser', userObj.username);
+
+                    $('body').append('<div class="load-wrapp">\n' +
+                        '            <div class="load-1">\n' +
+                        '                <div class="line"></div>\n' +
+                        '                <div class="line"></div>\n' +
+                        '                <div class="line"></div>\n' +
+                        '            </div>');
+
+                    $(this).text('Cancel');
+                    $('#menu_title').text('It is searching...');
+                    $('#sub_title').text('');
+                    isLoading = true;
+                }
+                else{
+                    $('.load-wrapp').remove();
+                    socket.emit('cancelSearch');
+                }
+                });
+
+            socket.on('getInfoChat', function (info) {
+               chatInfo = JSON.parse(info);console.log(info);
+            });
+
+            socket.on('closeChat', function (info){
+                if(info === 'cancel')
+                closeSearch();
+                else
+                    closeChat();
+            });
+
+            socket.on('sendMessage', function (messageInfo) {
+                messageInfo = JSON.parse(messageInfo);
+                let messageColor;
+
+                if(messageInfo.from === userObj.username)
+                    messageColor = '#00AF90';
+                else
+                    messageColor = 'crimson';
+
+                $('#msg_container').append(`<li>
+                    <div class="row comments mb-2">
+                        <div class="col-md-2 col-sm-2 col-3 text-center user-img">
+                            <img id="profile-photo" src="http://nicesnippets.com/demo/man01.png" class="rounded-circle" />
+                        </div>
+                        <div class="col-md-9 col-sm-9 col-9 comment rounded mb-2" style="background-color: ${messageColor}">
+                            <h4 class="m-0">${messageInfo.from}</h4>
+                            <time class="text-white ml-3">${messageInfo.message.time}</time>
+                            <like></like>
+                            <p class="mb-0 text-white">${messageInfo.message.text}</p>
+                        </div>
+                    </div>
+                </li>`);
+            });
+
+            socket.on('startChat', function (data){
+                chatInfo = JSON.parse(data);
+
+                $('#main_menu').remove();
+                $('.load-wrapp').remove();
+
+                $('body').append(
+                    '<div id="countdown" class="countdown">\n' +
+                    '    <div class="countdown-number">\n' +
+                    '        <span class="minutes countdown-time"></span>\n' +
+                    '        <span class="countdown-text">Minutes</span>\n' +
+                    '    </div>\n' +
+                    '    <div class="countdown-number">\n' +
+                    '        <span class="seconds countdown-time"></span>\n' +
+                    '        <span class="countdown-text">Seconds</span>\n' +
+                    '    </div>\n' +
+                    '</div>' +
+                    '<div class="container">\n' +
+                    '    <div class="row mt-5">\n' +
+                    '        <div class="col-md-6 offset-md-3 col-sm-6 offset-sm-3 col-12 comments-main pt-4 rounded">\n' +
+                    '            <ul class="p-0" id="msg_container">\n' +
+                    '\n' +
+                    '            </ul>\n' +
+                    '            <div class="row comment-box-main p-3 rounded-bottom">\n' +
+                    '                <div class="col-md-9 col-sm-9 col-9 pr-0 comment-box">\n' +
+                    '                    <input type="text" class="form-control" placeholder="comment ...." id="message_input"/>\n' +
+                    '                </div>\n' +
+                    '                <div class="col-md-3 col-sm-2 col-2 pl-0 text-center send-btn">\n' +
+                    '                    <button class="btn btn-info" id="send">Send</button>\n' +
+                    '                </div>\n' +
+                    '            </div>\n' +
+                    '        </div>\n' +
+                    '    </div>\n' +
+                    '</div>');
+
+
+                $('#msg_container').append(`<li>
+                    <div class="row comments mb-2">
+                    <div class="col-md-2 col-sm-2 col-3 text-center user-img">
+                            <img id="profile-photo" src="http://nicesnippets.com/demo/man02.png" class="rounded-circle" />
+                        </div>
+                        <div class="col-md-9 col-sm-9 col-9 comment rounded mb-2" style="background-color: orangered">
+                            <h4 class="m-0"></h4>
+                            <time class="text-white ml-3">${new Date().toGMTString()}</time>
+                            <like></like>
+                            <p class="mb-0 text-white">Start chatting first!</p>
+                        </div>
+                    </div>
+                </li>`);
+
+
+                $('#send').click(function () {
+                    let messageInfo = {
+                        room: chatInfo.name,
+                        from: userObj.username,
+                        message: {
+                            time: new Date().toGMTString(),
+                            text: $('#message_input').val()
+                        }
+                    };
+                    console.log(messageInfo)
+                    socket.emit('getMessage', JSON.stringify(messageInfo));
+                });
+
+                let deadline = new Date(Date.parse(new Date()) + 5 * 60 * 1000);
+                initializeClock('countdown', deadline, () => {socket.emit('timeEnd')});
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+    <h5 class="my-0 mr-md-auto font-weight-normal">@AnonChat</h5>
+    <nav class="my-2 my-md-0 mr-md-3">
+        <a class="p-2 text-dark" id="username"></a>
+    </nav>
+    <a class="btn btn-outline-primary" href="/logout">Log out</a>
+</div>
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center" id="main_menu">
+    <h1 class="display-4" id="menu_title">Start chatting</h1>
+    <p class="lead" id="sub_title">Click the button to start the searching of a random person</p>
+</div>
+<button type="button" class="btn btn-danger btn-rounded">Start random chat</button>
+
+</body>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/0.12.14/vue.min.js'></script>
+
+</html>
